@@ -36,13 +36,13 @@
                     {% for post in posts %}
                     <div class="col-md-12">
                         <div class="post-entry-horzontal">
-                            <a href="blog-single.html">
+                            <a href="/blog/{{ post.id }}">
                                 <div class="image" style="background-image: url({{ post.image.url }});"></div>
                                 <span class="text">
                                  <div class="post-meta">
                                      <span class="category">{{ post.category }}</span>
                                      <span class="mr-2">{{ post.created_at }}</span> &bullet;
-                                     <span class="ml-2"><span class="fa fa-comments"></span> 3</span>
+                                     <span class="ml-2"><span class="fa fa-comments"></span> {{ post.num_comments }}</span>
                                  </div>
                                  <h2>{{ post.sub_title }}</h2>
                                 </span>
@@ -55,11 +55,19 @@
                     <div class="col-md-12 text-center">
                         <nav aria-label="Page navigation" class="text-center">
                             <ul class="pagination">
-                                <li class="page-item  active"><a class="page-link" href="#">Prev</a></li>
-                                {% for i in more_posts.paginator.page_range %}
-                                <li class="page-item"><a class="page-link" href="#">1</a></li>
-               
-                                <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                                {% if latest_posts.has_previous %}
+                                <li class="page-item  active"><a class="page-link" href="?page={{ latest_posts.previous_page_number }}">Prev</a></li>
+                                {% endif %}
+                                {% for i in latest_posts.paginator.page_range %}
+                                {% if latest_posts.number == i %}
+                                <li class="active">{{ i }}</li>
+                                {% else %}
+                                <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                                {% endif %}
+                                {% endfor %}
+                                {% if latest_posts.has_next %}
+                                <li class="page-item"><a class="page-link" href="?page={{ latest_posts.next_page_number }}">Next</a></li>
+                                {% endif %}
                             </ul>
                         </nav>
                     </div>

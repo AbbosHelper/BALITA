@@ -40,7 +40,7 @@ class Post(models.Model):
     title = models.CharField(max_length=120)
     sub_title = models.CharField(max_length=200, null=True, blank=True)
     description = RichTextField()
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, null=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, null=True, related_name='posts')
     tags = models.ManyToManyField(Tag, blank=True)
     image = models.ImageField(upload_to='posts/', blank=True, null=True)
     is_published = models.BooleanField(default=True)
@@ -56,7 +56,7 @@ class Comment(models.Model):
     name = models.CharField(max_length=50)
     email = models.EmailField()
     message = models.TextField()
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True, related_name='comments')
     is_published = models.BooleanField(default=True)
 
     created_at = models.DateTimeField(auto_now_add=True)

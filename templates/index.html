@@ -16,7 +16,7 @@
                                 <div class="post-meta">
                                     <span class="category">{{ post.category }}</span>
                                     <span class="mr-2">{{ post.created_at }}</span> &bullet;
-                                    <span class="ml-2"><span class="fa fa-comments"></span> {{ comments_num }}</span>
+                                    <span class="ml-2"><span class="fa fa-comments"></span> {{ post.num_comments }}</span>
                                 </div>
                                 <h3>{{ post.title }}</h3>
                                 <p>{{ post.sub_title }}</p>
@@ -36,7 +36,7 @@
                         <div class="post-meta">
                             <span class="category">{{ post.category }}</span>
                             <span class="mr-2">{{ post.created_at }}</span> &bullet;
-                            <span class="ml-2"><span class="fa fa-comments"></span> {{ comments_num }}</span>
+                            <span class="ml-2"><span class="fa fa-comments"></span> {{ post.num_comments }}</span>
                         </div>
                         <h3>{{ post.title }}</h3>
                     </div>
@@ -57,7 +57,7 @@
         <div class="row blog-entries">
             <div class="col-md-12 col-lg-8 main-content">
                 <div class="row">
-                    {% for post in more_posts %}
+                    {% for post in all_posts %}
                     <div class="col-md-6">
                         <a href="/blog/{{ post.id }}" class="blog-entry element-animate" data-animate-effect="fadeIn">
                             <img src="{{ post.image.url }}" alt="Image placeholder">
@@ -65,7 +65,7 @@
                                 <div class="post-meta">
                                     <span class="category">{{ post.category }}</span>
                                     <span class="mr-2">{{ post.created_at }}</span> &bullet;
-                                    <span class="ml-2"><span class="fa fa-comments"></span> {{ comments_num }}</span>
+                                    <span class="ml-2"><span class="fa fa-comments"></span> {{ post.num_comments }}</span>
                                 </div>
                                 <h2>{{ post.title }}</h2>
                             </div>
@@ -77,18 +77,18 @@
                     <div class="col-md-12 text-center">
                         <nav aria-label="Page navigation" class="text-center">
                             <ul class="pagination">
-                                {% if more_posts.has_previous %}
-                                <li class="page-item"><a class="page-link" href="?page={{ more_posts.previous_page_number }}">Prev</a></li>
+                                {% if all_posts.has_previous %}
+                                <li class="page-item"><a class="page-link" href="?page={{ all_posts.previous_page_number }}">Prev</a></li>
                                 {% endif %}
-                                {% for i in more_posts.paginator.page_range %}
-                                {% if more_posts.number == i %}
+                                {% for i in all_posts.paginator.page_range %}
+                                {% if all_posts.number == i %}
                                 <li class="active">{{ i }}</li>
                                 {% else %}
                                 <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
                                 {% endif %}
                                 {% endfor %}
-                                {% if more_posts.has_next %}
-                                <li class="page-item"><a class="page-link" href="?page={{ most_posts.next_page_number }}">Next</a></li>
+                                {% if all_posts.has_next %}
+                                <li class="page-item"><a class="page-link" href="?page={{ all_posts.next_page_number }}">Next</a></li>
                                 {% endif %}
                             </ul>
                         </nav>
@@ -100,7 +100,7 @@
                     </div>
                     <div class="col-md-12">
                         <div class="post-entry-horzontal">
-                            {% for post in more_posts %}
+                            {% for post in posts %}
                             <a href="/blog/{{ post.id }}">
                                 <div class="image element-animate" data-animate-effect="fadeIn"
                                      style="background-image: url({{ post.image.url }});"></div>
@@ -108,7 +108,7 @@
                                 <div class="post-meta">
                                    <span class="category">{{ post.category }}</span>
                                    <span class="mr-2">{{ post.created_at }}</span> &bullet;
-                                   <span class="ml-2"><span class="fa fa-comments"></span> {{ comments_num }}</span>
+                                   <span class="ml-2"><span class="fa fa-comments"></span> {{ post.num_comments }}</span>
                                 </div>
                                     <h2>{{ post.title }}</h2>
                                  </span>

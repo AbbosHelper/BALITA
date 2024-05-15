@@ -1,3 +1,4 @@
+from django.db.models import Count
 from django.shortcuts import render, redirect
 from .models import Post, Contact, Comment, Category, Tag
 from django.core.paginator import Paginator
@@ -10,47 +11,63 @@ CHAT_ID = '1624671606'
 def home_view(request):
     data = request.GET
     page = data.get('page', 1)
-    more_posts = Post.objects.all()
+    more_posts = Post.objects.annotate(num_comments=Count('comments')).order_by('-num_comments')[:3]
     tags = Tag.objects.all()
-    categories_name = Category.objects.all()
-    posts = Post.objects.filter(is_published=True).order_by('created_at')[:3]
-    page_obj = Paginator(more_posts, 4)
+    all_posts = Post.objects.annotate(num_comments=Count('comments'))
+    categories_name = Category.objects.annotate(num_posts=Count('posts'))
+    posts = Post.objects.annotate(num_comments=Count('comments')).order_by('-created_at')[:3]
+    latest_posts = Post.objects.annotate(num_comments=Count('comments')).order_by('-created_at')[:3]
+    page_obj = Paginator(all_posts, 4)
     d = {
         'posts': posts,
-        'more_posts': page_obj.get_page(page),
+        'more_posts': more_posts,
         'home': 'active',
         'categories_name': categories_name,
-        'tags': tags
+        'tags': tags,
+        'all_posts': page_obj.get_page(page),
+        'latest_posts': latest_posts
 
     }
     return render(request, 'index.html', context=d)
 
 
 def about_view(request):
-    posts = Post.objects.filter(is_published=True).order_by('created_at')[:3]
+    data = request.GET
+    page = data.get('page', 1)
+    posts = Post.objects.annotate(num_comments=Count('comments')).order_by('-created_at')[:3]
     tags = Tag.objects.all()
-    categories_name = Category.objects.all()
+    latest_posts = Post.objects.annotate(num_comments=Count('comments')).order_by('-created_at')[:3]
+    categories_name = Category.objects.annotate(num_posts=Count('posts'))
+    more_posts = Post.objects.annotate(num_comments=Count('comments')).order_by('-num_comments')[:3]
+    page_obj = Paginator(latest_posts, 4)
     d = {
         'posts': posts,
+        'latest_posts': page_obj.get_page(page),
         'about': 'active',
         'categories_name': categories_name,
-        'tags': tags
+        'tags': tags,
+        'more_posts': more_posts
+
     }
     return render(request, 'about.html', context=d)
 
 
 def detail_view(request, pk):
     post = Post.objects.filter(id=pk).first()
-    posts = Post.objects.filter(is_published=True).order_by('created_at')[:3]
+    latest_posts = Post.objects.annotate(num_comments=Count('comments')).order_by('-created_at')[:3]
     tags = Tag.objects.all()
+    categories_name = Category.objects.annotate(num_posts=Count('posts'))
+    more_posts = Post.objects.annotate(num_comments=Count('comments')).order_by('-num_comments')[:3]
     comments = Comment.objects.filter(post_id=pk, is_published=True)
     d = {
         'post': post,
-        'posts': posts,
+        'latest_posts': latest_posts,
         'comments': comments,
         'comments_num': len(comments),
         'blog': 'active',
-        'tags': tags
+        'tags': tags,
+        'categories_name': categories_name,
+        'more_posts': more_posts
     }
     if request.method == 'POST':
         data = request.POST
@@ -65,8 +82,10 @@ def category_view(request):
     data = request.GET
     cat = data.get('cat', None)
     categ = Category.objects.filter(id=cat).first()
-    posts = Post.objects.filter(is_published=True, category_id=cat)
-    categories_name = Category.objects.all()
+    posts = Post.objects.annotate(num_comments=Count('comments')).filter(category_id=cat)
+    latest_posts = Post.objects.annotate(num_comments=Count('comments')).order_by('-created_at')[:3]
+    more_posts = Post.objects.annotate(num_comments=Count('comments')).order_by('-num_comments')[:3]
+    categories_name = Category.objects.annotate(num_posts=Count('posts'))
     tags = Tag.objects.all()
 
     d = {
@@ -74,7 +93,9 @@ def category_view(request):
         'categ': categ,
         'posts': posts,
         'categories_name': categories_name,
-        'tags': tags
+        'tags': tags,
+        'more_posts': more_posts,
+        'latest_posts': latest_posts
 
     }
 
@@ -82,14 +103,16 @@ def category_view(request):
 
 
 def contact_view(request):
-    posts = Post.objects.filter(is_published=True).order_by('created_at')[:3]
-    categories_name = Category.objects.all()
+    latest_posts = Post.objects.annotate(num_comments=Count('comments')).order_by('-created_at')[:3]
+    categories_name = Category.objects.annotate(num_posts=Count('posts'))
+    more_posts = Post.objects.annotate(num_comments=Count('comments')).order_by('-num_comments')[:3]
     tags = Tag.objects.all()
     d = {
-        'posts': posts,
+        'latest_posts': latest_posts,
         'contact': 'active',
         'categories_name': categories_name,
-        'tags': tags
+        'tags': tags,
+        'more_posts': more_posts
     }
     if request.method == 'POST':
         data = request.POST
@@ -118,29 +141,41 @@ def search_view(request):
         return redirect(f'/search?q={query}')
 
     query = request.GET.get('q')
-    posts = Post.objects.filter(is_published=True, title__icontains=query)
+    categories_name = Category.objects.annotate(num_posts=Count('posts'))
+    posts = Post.objects.annotate(num_comments=Count('comments')).filter(is_published=True, title__icontains=query)
+    latest_posts = Post.objects.annotate(num_comments=Count('comments')).order_by('-created_at')[:3]
+    more_posts = Post.objects.annotate(num_comments=Count('comments')).order_by('-num_comments')[:3]
     tags = Tag.objects.all()
     d = {
         'posts': posts,
-        'tags': tags
+        'tags': tags,
+        'categories_name': categories_name,
+        'latest_posts': latest_posts,
+        'more_posts': more_posts
     }
-    return render(request, 'category.html', context=d)
+    return render(request, 'search.html', context=d)
 
 
 def tag_view(request):
     data = request.GET
     tag_id = data.get('tag', None)
-    categories = Category.objects.all()
+    categories_name = Category.objects.annotate(num_posts=Count('posts'))
+    more_posts = Post.objects.annotate(num_comments=Count('comments')).order_by('-num_comments')[:3]
+    latest_posts = Post.objects.annotate(num_comments=Count('comments')).order_by('-created_at')[:3]
     tags = Tag.objects.all()
+    tag = Tag.objects.filter(id=tag_id).first()
 
     if tag_id:
-        posts = Post.objects.filter(is_published=True, tag=tag_id)
+        posts = Post.objects.annotate(num_comments=Count('comments')).filter(is_published=True, tag=tag_id)
     else:
-        posts = Post.objects.filter(is_published=True)
+        posts = Post.objects.annotate(num_comments=Count('comments')).filter(is_published=True)
 
     d = {
         'posts': posts,
-        'categories': categories,
-        'tags': tags
+        'categories_name': categories_name,
+        'tags': tags,
+        'tag': tag,
+        'more_posts': more_posts,
+        'latest_posts': latest_posts
     }
-    return render(request, 'index.html', context=d)
+    return render(request, 'tag.html', context=d)

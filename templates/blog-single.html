@@ -19,10 +19,6 @@
                     </p>
                 </div>
                 <div class="pt-5">
-                    <p>Categories: <a href="#">Food</a>, <a href="#">Travel</a> Tags: <a href="#">#manila</a>, <a
-                            href="#">#asia</a></p>
-                </div>
-                <div class="pt-5">
                     <h3 class="mb-5">{{ comments_num }} Comments</h3>
                     <ul class="comment-list">
                         {% for comment in comments %}
@@ -79,13 +75,13 @@
         <div class="row">
             {% for post in posts %}
             <div class="col-md-6 col-lg-4">
-                <a href="#" class="a-block d-flex align-items-center height-md"
+                <a href="/blog/{{ post.id }}" class="a-block d-flex align-items-center height-md"
                    style="background-image: url({{ post.image.url }}); ">
                     <div class="text">
                         <div class="post-meta">
                             <span class="category">{{ post.category }}</span>
                             <span class="mr-2">{{ post.created_at }}</span> &bullet;
-                            <span class="ml-2"><span class="fa fa-comments"></span> 3</span>
+                            <span class="ml-2"><span class="fa fa-comments"></span> {{ post.num_comments }}</span>
                         </div>
                         <h3>{{ post.sub_title }}</h3>
                     </div>
